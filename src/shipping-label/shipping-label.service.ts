@@ -16,27 +16,35 @@ export class ShippingLabelService {
     async create(
         createShipmentsDTO: CreateShipmentsDTO,
     ): Promise<any> {
+        const { user : { userId, authorizationId } } = createShipmentsDTO;
         let { shipments } = createShipmentsDTO;
+        const size = _.size(shipments);
+        let status = "pending"
+        let processed = 0;
 
         _.forEach(shipments, function(shipment) {
-            shipment.status = "pending";      
+            shipment.status = "pending";   
+            shipment.tracking_number="";
+            shipment.file_url="";
         });
 
         const shipmentLabels:ShipmentLabelsDTO={
-            userId: "622264ddcee521aa8e567269",
-            authorizationId :  "622264ddcee521aa8e56726a",
+            userId,
+            authorizationId,
             status:"pending",
             sendNotification :  "false",
             shipments,
         }
 
-        await this.shippingLabelRepository.save(shipmentLabels);
-        return createShipmentsDTO;
+        const { _id } = await this.shippingLabelRepository.save(shipmentLabels);
+        return { _id, status, processed, size, text:`Proceso : ${processed} / ${size}`};
     }  
     
     
     @Cron('45 * * * * *')
-    handleCron() {
-        this.logger.debug('ShippingLabelService');
+    async handleCron() {
+        //const pendingLabels = await this.shippingLabelRepository.findPending();
+        //this.logger.debug(`${JSON.stringify(pendingLabels)}`);
+        this.logger.debug(`handleCron`);
     }
 }

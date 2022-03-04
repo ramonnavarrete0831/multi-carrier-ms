@@ -35,6 +35,8 @@ const ShipmentSchema = new mongoose.Schema({
 
 const RootShipmentSchema = new mongoose.Schema({
   status: { type: String, required: true },
+  tracking_number: { type: String, required: false },
+  file_url: { type: String, required: false },
   carrier: { type: String, required: true },
   shipment: ShipmentSchema,
 });

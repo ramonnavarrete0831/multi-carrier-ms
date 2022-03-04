@@ -32,7 +32,9 @@ class ShipmentDTO {
 }
 
 class RootShipmentDTO {
-  status : string ;
+  status ? : string ;
+  tracking_number ?: string;
+  file_url ?: string;
   carrier: string;
   shipment: ShipmentDTO;
 }

@@ -31,12 +31,20 @@ class ShipmentDTO {
   parcels: ParcelDTO[];
 }
 
+class UserDTO {
+  userId : string ;
+  authorizationId: string;
+}
+
 class RootShipmentDTO {
-  status : string ;
+  status ? : string ;
+  tracking_number ? : string;
+  file_url ? : string;
   carrier: string;
   shipment: ShipmentDTO;
 }
 
 export class CreateShipmentsDTO {
+  user: UserDTO;
   shipments: RootShipmentDTO[];
 }
