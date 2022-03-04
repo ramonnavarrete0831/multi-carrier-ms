@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 export class GreetingService {
 
     hello():string{
-        return "MicroServicio";
+        return "Hello World!";
     }
 
 }
