@@ -27,6 +27,8 @@
     "@nestjs/microservices": "^8.4.0",
     "@nestjs/mongoose": "^9.0.2",
     "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/schedule": "^1.0.2",
+    "@types/cron": "^1.7.3",
     "axios": "^0.26.0",
     "mongoose": "^6.2.4",
     "reflect-metadata": "^0.1.13",
