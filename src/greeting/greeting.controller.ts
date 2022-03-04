@@ -5,9 +5,9 @@ import { GreetingService } from './greeting.service';
 
 @Controller()
 export class GreetingController {
-    constructor(private greetingService:GreetingService){}
-    @MessagePattern({cmd: CarrierSMG.HELLO})
-    hello() : string {
-       return this.greetingService.hello();
-    }
+  constructor(private greetingService: GreetingService) {}
+  @MessagePattern({ cmd: CarrierSMG.HELLO })
+  hello(): string {
+    return this.greetingService.hello();
+  }
 }

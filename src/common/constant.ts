@@ -1,3 +1,3 @@
-export enum CarrierSMG{
-    HELLO = 'hello',
+export enum CarrierSMG {
+  HELLO = 'hello',
 }

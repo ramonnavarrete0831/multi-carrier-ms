@@ -18,12 +18,15 @@ const microserviceOptions = {
 };
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice(AppModule, microserviceOptions);
+  const app = await NestFactory.createMicroservice(
+    AppModule,
+    microserviceOptions,
+  );
   app.listen();
 
   /*const app = await NestFactory.create(AppModule);
   app.listen(8877);*/
-  
-  logger.log (`Microservice Listening on ${host}:${port}`);
+
+  logger.log(`Microservice Listening on ${host}:${port}`);
 }
 bootstrap();
