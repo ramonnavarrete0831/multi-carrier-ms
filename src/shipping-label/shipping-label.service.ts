@@ -4,6 +4,7 @@ import * as _ from "lodash";
 import { ShipmentLabelsDTO } from '../common/mongo/dto/shipment-labels.dto';
 import { ShippingLabelRepository } from '../common/mongo/repository/shipping-label.repository';
 import { CreateShipmentsDTO } from './dto/create-shipments.dto';
+import { IResponseCreateLabels } from './interfaces/response-create-labels.interfaces';
 
 @Injectable()
 export class ShippingLabelService {
@@ -15,7 +16,7 @@ export class ShippingLabelService {
 
     async create(
         createShipmentsDTO: CreateShipmentsDTO,
-    ): Promise<any> {
+    ): Promise<IResponseCreateLabels> {
         const { user : { userId, authorizationId } } = createShipmentsDTO;
         let { shipments } = createShipmentsDTO;
         const size = _.size(shipments);
@@ -37,7 +38,16 @@ export class ShippingLabelService {
         }
 
         const { _id } = await this.shippingLabelRepository.save(shipmentLabels);
-        return { _id, status, processed, size, text:`Proceso : ${processed} / ${size}`};
+        
+        const iResponseCreateLabels : IResponseCreateLabels = {
+            _id, 
+            status, 
+            processed, 
+            size,
+            text:`Proceso : ${processed} / ${size}`
+        }
+
+        return  iResponseCreateLabels;
     }  
     
     
