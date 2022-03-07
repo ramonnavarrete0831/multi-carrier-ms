@@ -1,5 +1,5 @@
 export interface IResponseCreateLabels{
-    _id : string, 
+    id : string, 
     status: string, 
     processed: number, 
     size:number, 

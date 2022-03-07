@@ -5,6 +5,7 @@ import { SHIPPING_LABEL } from '../common/mongo/models';
 import { ShippingLabelSchema } from '../common/mongo/schemas/shipping-label.schema';
 import { ShippingLabelController } from './shipping-label.controller';
 import { ShippingLabelService } from './shipping-label.service';
+import { GenericCarrierApiService } from '../common/carrier-api/generic-carrier-api.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { ShippingLabelService } from './shipping-label.service';
     ]),
   ],
   controllers: [ShippingLabelController],
-  providers: [ShippingLabelService, ShippingLabelRepository],
+  providers: [ShippingLabelService, ShippingLabelRepository,GenericCarrierApiService],
 })
 export class ShippingLabelModule {}
