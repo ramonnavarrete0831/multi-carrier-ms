@@ -1,3 +1,4 @@
 export enum CarrierSMG {
-  HELLO = 'hello',
+  SHIPPING_LABEL_CREATE = 'shipping-label-create',
+  SHIPPING_LABEL_FIND = 'shipping-label-find',
 }

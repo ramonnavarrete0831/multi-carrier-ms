@@ -59,13 +59,13 @@ export class ShippingLabelService {
 
         return  iResponseCreateLabels;
     }  
+    
 
     async getById(
-        idDTO: IdDTO,
-        userDTO: UserDTO
+        idDTO: IdDTO
     ): Promise<IResponseCreateLabels> {
-        const { id } = idDTO;
-        const { userId, authorizationId } = userDTO;
+        const { id, user } = idDTO;
+        const { userId, authorizationId } = user;
 
         const { shipments, status} = await this.shippingLabelRepository.findByUser(userId, authorizationId, id);
 

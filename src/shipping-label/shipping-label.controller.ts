@@ -1,16 +1,18 @@
-import { Body, Controller, Logger, Post , Get, Param} from '@nestjs/common';
+import { Body, Controller, Logger, Get, Param} from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { CarrierSMG } from 'src/common/constant';
 import { CreateShipmentsDTO } from './dto/create-shipments.dto';
 import { IdDTO } from './dto/id.dto';
 import { UserDTO } from './dto/user-dto';
 import { IResponseCreateLabels } from './interfaces/response-create-labels.interfaces';
 import { ShippingLabelService } from './shipping-label.service';
 
-@Controller('shipping-label')
+@Controller()
 export class ShippingLabelController {
     private logger = new Logger('ShippingLabelController');
     constructor(private shippingLabelService: ShippingLabelService) {}
 
-    @Post("create")
+    @MessagePattern({ cmd: CarrierSMG.SHIPPING_LABEL_CREATE })
     async create(
         @Body() createShipmentsDTO: CreateShipmentsDTO,
     ): Promise<IResponseCreateLabels> {
@@ -20,14 +22,14 @@ export class ShippingLabelController {
         return this.shippingLabelService.create(createShipmentsDTO);
     }
 
-    @Get("/:id")
+    
+    @MessagePattern({ cmd: CarrierSMG.SHIPPING_LABEL_FIND })
     async getById(
-        @Param() idDTO: IdDTO,
-        @Body() userDTO: UserDTO,
+        @Body() idDTO: IdDTO,
     ): Promise<IResponseCreateLabels> {
         this.logger.verbose(
             `Petición para obtener avances de proceamiento en el webservice`,
         );
-        return this.shippingLabelService.getById(idDTO,userDTO);
+        return this.shippingLabelService.getById(idDTO);
     }
 }
