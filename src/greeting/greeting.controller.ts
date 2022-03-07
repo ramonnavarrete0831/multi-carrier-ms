@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { CarrierSMG } from 'src/common/constant';
+import { CarrierSMG } from '../common/constant';
 import { GreetingService } from './greeting.service';
 
 @Controller()

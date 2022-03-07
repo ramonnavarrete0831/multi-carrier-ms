@@ -1,3 +1,5 @@
+import { UserDTO } from "./user-dto";
+
 class AddressFromDTO {
   name: string;
   street1: string;
@@ -31,10 +33,7 @@ class ShipmentDTO {
   parcels: ParcelDTO[];
 }
 
-class UserDTO {
-  userId : string ;
-  authorizationId: string;
-}
+
 
 class RootShipmentDTO {
   status ? : string ;

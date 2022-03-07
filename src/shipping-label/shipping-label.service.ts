@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron , Interval} from '@nestjs/schedule';
+import { Interval} from '@nestjs/schedule';
 import * as _ from "lodash";
 import { GenericCarrierApiService } from '../common/carrier-api/generic-carrier-api.service';
 import { ShipmentLabelsDTO } from '../common/mongo/dto/shipment-labels.dto';
 import { ShippingLabelRepository } from '../common/mongo/repository/shipping-label.repository';
 import { CreateShipmentsDTO } from './dto/create-shipments.dto';
+import { IdDTO } from './dto/id.dto';
+import { UserDTO } from './dto/user-dto';
 import { StatusEnum } from './enum/status.enum';
 import { IResponseCreateLabels } from './interfaces/response-create-labels.interfaces';
 
@@ -20,8 +22,6 @@ export class ShippingLabelService {
     async create(
         createShipmentsDTO: CreateShipmentsDTO,
     ): Promise<IResponseCreateLabels> {
-        //await this.handleCron();
-        //return null;
 
         const { user : { userId, authorizationId } } = createShipmentsDTO;
         let { shipments } = createShipmentsDTO;
@@ -55,6 +55,35 @@ export class ShippingLabelService {
 
         return  iResponseCreateLabels;
        
+    }  
+
+    async getById(
+        idDTO: IdDTO,
+        userDTO: UserDTO
+    ): Promise<IResponseCreateLabels> {
+        const { id } = idDTO;
+        const { userId, authorizationId } = userDTO;
+
+        const { shipments, status} = await this.shippingLabelRepository.findByUser(userId, authorizationId, id);
+
+        const size = _.size(shipments);
+        let processed = 0;
+
+        _.forEach(shipments, function(shipment) {
+            const { status } = shipment;
+            if(status==StatusEnum.COMPLETED){
+                processed++;
+            }
+        });
+      
+        const iResponseCreateLabels : IResponseCreateLabels = {
+            id, 
+            status, 
+            processed, 
+            size,
+            text:`Proceso : ${processed} / ${size}`
+        }
+        return  iResponseCreateLabels;
     }  
     
     

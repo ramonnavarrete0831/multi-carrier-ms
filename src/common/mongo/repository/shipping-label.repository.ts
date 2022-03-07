@@ -2,10 +2,11 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { StatusEnum } from 'src/shipping-label/enum/status.enum';
+import { StatusEnum } from '../../../shipping-label/enum/status.enum';
 import { ShipmentLabelsDTO } from '../dto/shipment-labels.dto';
 import { IShippingLabel } from '../interfaces/shipping-label.interface';
 import { SHIPPING_LABEL } from '../models';
@@ -28,6 +29,22 @@ export class ShippingLabelRepository {
       this.logger.verbose(exMsg);
       throw new InternalServerErrorException(exMsg);
     }
+  }
+
+  async findByUser(userId:string,authorizationId:string,  _id:string): Promise<IShippingLabel> {
+    const filters = {
+      _id,
+      userId,
+      authorizationId,
+    };
+    const shipmentLabel = await this.shippingLabelModel.findOne(filters);
+
+    if (!shipmentLabel) {
+      const exMsg = `Ups! no fué encontrada la información solicitada.`;
+      this.logger.verbose(exMsg);
+      throw new NotFoundException(exMsg);
+    }
+    return shipmentLabel;
   }
 
   async findPending(): Promise<IShippingLabel> {
