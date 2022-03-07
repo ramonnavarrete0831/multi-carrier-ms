@@ -11,6 +11,8 @@ import { UserDTO } from './dto/user-dto';
 import { StatusEnum } from './enum/status.enum';
 import { IResponseCreateLabels } from './interfaces/response-create-labels.interfaces';
 import { NotificationService } from '../common/notification/notification.service';
+import { CarierEnum } from './enum/carrier.enum';
+import { FakeCarrierApi } from '../common/carrier-api/fake-carrier-api';
 
 @Injectable()
 export class ShippingLabelService {
@@ -95,19 +97,22 @@ export class ShippingLabelService {
     async handleCron() : Promise<void> {
         const shipmentLabel = await this.shippingLabelRepository.findPending();
         if(shipmentLabel){
-            const { _id : id, authorizationId } = shipmentLabel;
-            const { shipments }  = shipmentLabel;
+            const { _id : idProcess, authorizationId, shipments,  } = shipmentLabel;
             const size = _.size(shipments);
             let processed = 0;
 
-            const shippingLabelRepository =  this.shippingLabelRepository;
-            const genericCarrierApiService =  this.genericCarrierApiService;
-
             for (let key = 0; key < shipments.length; key++) {
                 const shipment = shipments[key];
-                const { _id : idRequest, status } = shipment;
+                const { _id : idRequest, status, carrier } = shipment;
                 if(status!=StatusEnum.COMPLETED){
-                    const resultLabel = await genericCarrierApiService.createLabel(shipment);
+                    
+                    let apiConfig = null;
+                    if(carrier == CarierEnum.FAKE_CARRIER){
+                        apiConfig = new FakeCarrierApi();
+                    }
+
+                    const resultLabel = await this.genericCarrierApiService.createLabel(shipment, apiConfig);
+                    
                     if(resultLabel){
                         processed++;
                         const{ attributes } = resultLabel;
@@ -119,7 +124,7 @@ export class ShippingLabelService {
                             file_url,
                             shipment : shipment.shipment
                         };
-                        await shippingLabelRepository.updateShipment(idRequest,update);
+                        await this.shippingLabelRepository.updateShipment(idRequest,update);
                     }
                 }else{
                     processed++;
@@ -127,20 +132,14 @@ export class ShippingLabelService {
             }
 
             if(processed == size){
-                
-                await this.shippingLabelRepository.markAsDone(id);
-                this.logger.log(`Proceso : ${processed} / ${size}`);
-
+                await this.shippingLabelRepository.markAsDone(idProcess);
                 const notification = {
                     authorizationId,
-                    message : `\`\`\`¡Buenas noticias!\`\`\`\n\nEl proceso con Id ${id} para solicitud de guias ha finalizado, puedes consultarlo en tu panel de administración.`,
+                    message : `\`\`\`¡Buenas noticias!\`\`\`\n\nEl proceso con Id ${idProcess} para solicitud de guias ha finalizado, puedes consultarlo en tu panel de administración.`,
                 };
-
                 const signedRequest = await this.jwtService.sign(notification);
                 await this.notificationService.whatsapp(signedRequest);
             }
         }
-
-        return null;
     }
 }

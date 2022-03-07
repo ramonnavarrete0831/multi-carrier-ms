@@ -1,23 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { ApiConfig } from './api-config.abstract';
 import { IResultLabel } from './interfeces/result-label.interface';
 
 @Injectable()
 export class GenericCarrierApiService {
-  private baseEndPoint = 'https://fake-carrier-api.skydropx.com/v1';
-
-  async createLabel(data:any): Promise<IResultLabel> {
+  async createLabel(data:any, apiConfig: ApiConfig): Promise<IResultLabel> {
+    
     let result = null;
     const options = {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Token token=vgEOaYn0LItk5K9FBEP9j9EUjZwcZvvL'
+        'Authorization': `Token token=${apiConfig.getAuthorization()}`
       }
     }
+    
     try {
       await axios
         .post(
-          `${this.baseEndPoint}/labels`,
+          apiConfig.getEndPoint(),
           data,
           options
         )

@@ -1,9 +1,8 @@
 import {
   Injectable,
-  InternalServerErrorException,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { StatusEnum } from '../../../shipping-label/enum/status.enum';
@@ -27,7 +26,7 @@ export class ShippingLabelRepository {
       console.log(error);
       const exMsg = `Ups! no pudimos almacenar la información de envío, intente nuevamente.`;
       this.logger.verbose(exMsg);
-      throw new InternalServerErrorException(exMsg);
+      throw new RpcException(exMsg);
     }
   }
 
@@ -42,7 +41,7 @@ export class ShippingLabelRepository {
     if (!shipmentLabel) {
       const exMsg = `Ups! no fué encontrada la información solicitada.`;
       this.logger.verbose(exMsg);
-      throw new NotFoundException(exMsg);
+      throw new RpcException(exMsg);
     }
     return shipmentLabel;
   }
