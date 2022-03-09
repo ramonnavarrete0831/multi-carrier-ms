@@ -7,13 +7,15 @@ import { ShipmentLabelsDTO } from '../common/mongo/dto/shipment-labels.dto';
 import { ShippingLabelRepository } from '../common/mongo/repository/shipping-label.repository';
 import { CreateShipmentsDTO } from './dto/create-shipments.dto';
 import { IdDTO } from './dto/id.dto';
-import { UserDTO } from './dto/user-dto';
 import { StatusEnum } from './enum/status.enum';
 import { IResponseCreateLabels } from './interfaces/response-create-labels.interfaces';
 import { NotificationService } from '../common/notification/notification.service';
 import { CarierEnum } from './enum/carrier.enum';
 import { FakeCarrierApi } from '../common/carrier-api/fake-carrier-api';
+import * as AdmZip from "adm-zip";
+import * as fs from "fs";
 
+ 
 @Injectable()
 export class ShippingLabelService {
     private logger = new Logger('ShippingLabelService');
@@ -70,16 +72,18 @@ export class ShippingLabelService {
         const { userId, authorizationId } = user;
 
         const { shipments, status} = await this.shippingLabelRepository.findByUser(userId, authorizationId, id);
-
         const size = _.size(shipments);
-        let processed = 0;
 
-        _.forEach(shipments, function(shipment) {
-            const { status } = shipment;
-            if(status==StatusEnum.COMPLETED){
-                processed++;
-            }
-        });
+        let processed = status===StatusEnum.COMPLETED ?size :0 ;
+
+        if(status!=StatusEnum.COMPLETED){
+            _.forEach(shipments, function(shipment) {
+                const { status } = shipment;
+                if(status==StatusEnum.COMPLETED){
+                    processed++;
+                }
+            });
+        }
       
         const iResponseCreateLabels : IResponseCreateLabels = {
             id, 
@@ -90,17 +94,55 @@ export class ShippingLabelService {
         }
         return  iResponseCreateLabels;
     }  
+
+
+    async getZipFile(
+        idDTO: IdDTO
+    ): Promise<string> {
+
+        const { id, user } = idDTO;
+        const { userId, authorizationId } = user;
+
+        const { id:idProcess, shipments} = await this.shippingLabelRepository.findByUser(userId, authorizationId, id);
+      
+        const zip = new AdmZip();
+        const outputFile = `./files/zip/${idProcess}.zip`;
+
+        let processed = 0 ;
+
+        _.forEach(shipments, function(shipment) {
+            const { status, tracking_number } = shipment;
+            if(status==StatusEnum.COMPLETED){
+                processed++;
+                zip.addLocalFile(`./files/pdf/${tracking_number}.pdf`);
+            }
+        });
+      
+        zip.writeZip(outputFile);
+
+        let binary = null;
+        try {
+            binary  = fs.readFileSync(outputFile, 'utf8');
+        } catch (err) {
+
+        }
+
+        return binary;
+    }  
     
     
     //@Cron('45 * * * * *')
     @Interval(5000)
     async handleCron() : Promise<void> {
+
         const shipmentLabel = await this.shippingLabelRepository.findPending();
         if(shipmentLabel){
+            
             const { _id : idProcess, authorizationId, shipments,  } = shipmentLabel;
-            const size = _.size(shipments);
-            let processed = 0;
 
+            const size = _.size(shipments);
+            let processed = 0;           
+            
             for (let key = 0; key < shipments.length; key++) {
                 const shipment = shipments[key];
                 const { _id : idRequest, status, carrier } = shipment;
@@ -124,7 +166,11 @@ export class ShippingLabelService {
                             file_url,
                             shipment : shipment.shipment
                         };
+
+                        this.genericCarrierApiService.download(file_url, tracking_number);
                         await this.shippingLabelRepository.updateShipment(idRequest,update);
+                     
+
                     }
                 }else{
                     processed++;

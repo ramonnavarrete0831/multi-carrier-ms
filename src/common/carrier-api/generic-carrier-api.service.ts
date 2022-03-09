@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { ApiConfig } from './api-config.abstract';
 import { IResultLabel } from './interfeces/result-label.interface';
+import * as fs from "fs";
+import * as https from "https";
 
 @Injectable()
 export class GenericCarrierApiService {
@@ -27,5 +29,17 @@ export class GenericCarrierApiService {
         });
     } catch (error) {}
     return result;
+  }
+
+  download( url:string , file_name : string)  {
+    https.get(url, (res) => {
+      const file = fs.createWriteStream(`files/pdf/${file_name}.pdf`);
+      res.pipe(file);
+      file.on('finish', () => {
+          file.close();
+      });
+    }).on("error", (err) => {
+      console.log("Error: ", err.message);
+    });
   }
 }

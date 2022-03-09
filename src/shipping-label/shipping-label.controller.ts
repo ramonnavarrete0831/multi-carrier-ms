@@ -1,11 +1,11 @@
-import { Body, Controller, Logger, Get, Param} from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Body, Controller, Logger} from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 import { CarrierSMG } from 'src/common/constant';
 import { CreateShipmentsDTO } from './dto/create-shipments.dto';
 import { IdDTO } from './dto/id.dto';
-import { UserDTO } from './dto/user-dto';
 import { IResponseCreateLabels } from './interfaces/response-create-labels.interfaces';
 import { ShippingLabelService } from './shipping-label.service';
+
 
 @Controller()
 export class ShippingLabelController {
@@ -31,5 +31,16 @@ export class ShippingLabelController {
             `Petición para obtener avances de proceamiento en el webservice`,
         );
         return this.shippingLabelService.getById(idDTO);
+    }
+
+
+    @MessagePattern({ cmd: CarrierSMG.SHIPPING_ZIP })
+    async getZipFile(
+        @Body() idDTO: IdDTO,
+    ): Promise<string> {
+        this.logger.verbose(
+            `Petición para obtener el archivo zip binario`,
+        );
+        return this.shippingLabelService.getZipFile(idDTO);
     }
 }
